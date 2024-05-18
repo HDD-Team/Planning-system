@@ -29,7 +29,8 @@ const CardsSchema = new mongoose.Schema({
   students: [
     {
       name: String,
-      surname: String
+      surname: String,
+      group: String
     }
   ],
   teamname: String

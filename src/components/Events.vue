@@ -56,6 +56,27 @@
                   />
                 </svg>
               </button>
+              <button
+                class="text-green-500 hover:text-green-700 focus:outline-none ml-2"
+                @click="showAddTeamModal(event)"
+              >
+                <svg
+                  fill="currentColor"
+                  viewBox="0 0 32 32"
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                >
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <title>plus-user</title>
+                    <path
+                      d="M2.016 28q0 0.832 0.576 1.44t1.408 0.576h14.016v-0.352q-1.792-0.608-2.912-2.176t-1.088-3.488q0-2.016 1.184-3.584t3.072-2.112q0.384-1.216 1.216-2.176t2.016-1.504q0.512-1.376 0.512-2.624v-1.984q0-3.328-2.368-5.664t-5.632-2.336-5.664 2.336-2.336 5.664v1.984q0 2.112 1.024 3.904t2.784 2.912q-1.504 0.544-2.912 1.504t-2.496 2.144-1.76 2.624-0.64 2.912zM18.016 24q0 0.832 0.576 1.44t1.408 0.576h2.016v1.984q0 0.864 0.576 1.44t1.408 0.576 1.408-0.576 0.608-1.44v-1.984h1.984q0.832 0 1.408-0.576t0.608-1.44-0.608-1.408-1.408-0.576h-1.984v-2.016q0-0.832-0.608-1.408t-1.408-0.576-1.408 0.576-0.576 1.408v2.016h-2.016q-0.832 0-1.408 0.576t-0.576 1.408z"
+                    ></path>
+                  </g>
+                </svg>
+              </button>
             </td>
             <td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">{{ event.title }}</td>
             <td class="whitespace-nowrap px-4 py-2 text-gray-700">{{ event.location }}</td>
@@ -64,45 +85,38 @@
               <div>
                 <span class="text-gray-700">{{ event.selectedStatus || event.status }}</span>
               </div>
+
               <div>
-                <button
-                  class="text-blue-500 hover:text-blue-700 focus:outline-none ml-2"
-                  @click="showStatusDropdown(event)"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.343 4.343 7.757l5.656 5.657z"
-                    />
-                  </svg>
-                </button>
-              </div>
-              <!-- Status Dropdown -->
-              <div class="relative">
                 <!-- Status Dropdown -->
                 <div
                   v-if="event.showStatusDropdown"
-                  class="absolute mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+                  class="absolute mt-2 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
                 >
-                  <div class="py-1">
+                  <div
+                    class="py-1"
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="options-menu"
+                  >
                     <a
-                      v-for="status in statusOptions"
+                      v-for="status in statuses"
                       :key="status"
-                      href="#"
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      @click.prevent="selectStatus(event, status)"
-                      >{{ status }}</a
+                      @click="selectStatus(event, status)"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                      role="menuitem"
                     >
+                      {{ status }}
+                    </a>
                   </div>
                 </div>
               </div>
+              <!-- Status Dropdown -->
             </td>
-            <td class="whitespace-nowrap px-4 py-2 text-gray-700">
-              <a :href="event.source" target="_blank" class="text-blue-500">Источник</a>
+            <td class="whitespace-nowrap px-4 py-2 text-sm text-gray-500">
+              <!-- Изменение для отображения источника в виде ссылки -->
+              <a :href="event.source" target="_blank" class="text-blue-500 hover:text-blue-700"
+                >Источник</a
+              >
             </td>
             <td class="whitespace-nowrap px-4 py-2 text-sm text-gray-500">
               <!-- Команды мероприятия -->
@@ -135,12 +149,31 @@
       <div class="bg-white p-6 rounded shadow shadow-lg">
         <h2 class="text-xl font-bold mb-4">Добавить команду</h2>
         <!-- Форма добавления команды -->
-        <button
-          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4"
-          @click="showAddTeamModalVisible = false"
-        >
-          Отмена
-        </button>
+        <form @submit.prevent="addTeam">
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="team">
+              Name of the team
+            </label>
+            <input
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="team"
+              type="text"
+              v-model="newTeamName"
+            />
+          </div>
+          <button
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+            type="submit"
+          >
+            Добавить
+          </button>
+          <button
+            class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4"
+            @click="showAddTeamModalVisible = false"
+          >
+            Отмена
+          </button>
+        </form>
       </div>
     </div>
     <!-- Модальное окно редактирования мероприятия -->
@@ -148,12 +181,49 @@
       <div class="bg-white p-6 rounded shadow shadow-lg">
         <h2 class="text-xl font-bold mb-4">Редактировать мероприятие</h2>
         <!-- Форма редактирования мероприятия -->
-        <button
-          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4"
-          @click="showEditEventModalVisible = false"
-        >
-          Отмена
-        </button>
+        <form @submit.prevent="editEvent">
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="title"> Название </label>
+            <input
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="title"
+              type="text"
+              v-model="currentEvent.title"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="location"> Место </label>
+            <input
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="location"
+              type="text"
+              v-model="currentEvent.location"
+            />
+          </div>
+          <div class="mb-4 cursor-pointer">
+            <label class="block text-gray-700 text-sm font-bold mb-2 cursor-pointer" for="date">
+              Дата
+            </label>
+            <input
+              class="cursor-pointer shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="date"
+              type="date"
+              v-model="currentEvent.date"
+            />
+          </div>
+          <button
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+            type="submit"
+          >
+            Сохранить
+          </button>
+          <button
+            class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4"
+            @click="showEditEventModalVisible = false"
+          >
+            Отмена
+          </button>
+        </form>
       </div>
     </div>
   </div>
@@ -171,8 +241,8 @@ export default {
           location: 'Москва',
           date: '2023-04-01',
           status: 'Активно',
-          selectedStatus: '', // Add this property
-          showStatusDropdown: false, // Add this property
+          selectedStatus: '',
+          showStatusDropdown: false,
           source: 'https://example.com',
           teams: [
             // Пример команды
@@ -192,8 +262,8 @@ export default {
           location: 'Санкт-Петербург',
           date: '2023-05-15',
           status: 'Неактивно',
-          selectedStatus: '', // Add this property
-          showStatusDropdown: false, // Add this property
+          selectedStatus: '',
+          showStatusDropdown: false,
           source: 'https://example.org',
           teams: [
             // Пример команды
@@ -212,8 +282,8 @@ export default {
           location: 'Москва',
           date: '2023-04-01',
           status: 'Активно',
-          selectedStatus: '', // Add this property
-          showStatusDropdown: false, // Add this property
+          selectedStatus: '',
+          showStatusDropdown: false,
           source: 'https://example.com',
           teams: [
             // Пример команды
@@ -240,8 +310,14 @@ export default {
       currentEvent: null,
       showEditEventModalVisible: false,
       showDeleteEventModal: false,
-      statusOptions: ['Активно', 'Неактивно', 'Ожидание'] // Update the status options
+      statuses: ['Активно', 'Неактивно', 'Завершено', 'Отменено'],
+      showAddTeamMemberModalVisible: false,
+      newTeamName: '',
+      currentTeam: null
     }
+  },
+  mounted() {
+    this.updateEventStatus()
   },
   methods: {
     showAddTeamModal(event) {
@@ -249,11 +325,9 @@ export default {
       this.showAddTeamModalVisible = true
     },
     showEditEventModal(event) {
-      // Добавьте этот метод
       this.currentEvent = event
       this.showEditEventModalVisible = true
     },
-    // Добавьте метод для обработки ввода команды и добавления ее в мероприятие
     showStatusDropdown(event) {
       event.showStatusDropdown = !event.showStatusDropdown
     },
@@ -268,6 +342,40 @@ export default {
           this.events.splice(index, 1)
         }
       }
+    },
+    editEvent() {
+      const index = this.events.findIndex((event) => event.id === this.currentEvent.id)
+      if (index !== -1) {
+        this.events.splice(index, 1, this.currentEvent)
+      }
+      this.showEditEventModalVisible = false
+      this.updateEventStatus()
+    },
+    addTeam() {
+      if (this.newTeamName) {
+        this.currentEvent.teams.push({
+          id: this.currentEvent.teams.length + 1,
+          name: this.newTeamName,
+          leader: '',
+          members: '',
+          status: ''
+        })
+        this.newTeamName = ''
+        this.showAddTeamModalVisible = false
+      }
+    },
+    updateEventStatus() {
+      const currentDate = new Date().toISOString().slice(0, 10)
+
+      this.events.forEach((event) => {
+        if (event.date < currentDate) {
+          event.status = 'Завершено'
+          event.selectedStatus = 'Завершено'
+        } else {
+          event.status = 'Неактивно'
+          event.selectedStatus = 'Неактивно'
+        }
+      })
     }
   }
 }

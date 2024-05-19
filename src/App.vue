@@ -9,7 +9,7 @@ import statistics from './components/statistics.vue'
 import Auth from './components/Auth.vue'
 </script>
 <template>
-  <!-- <Auth /> -->
+  <Auth />
   <Header />
   <Events />
   <div class="mx-auto max-w-screen-xl sm:px-8 lg:px-8">

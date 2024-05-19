@@ -78,9 +78,6 @@
                   >{{ event.websiteEvent }}</a
                 >
               </div>
-              <div v-else>
-                {{ event.statusEvent }}
-              </div>
             </td>
             <td class="whitespace-nowrap px-4 py-2 text-sm text-gray-500">
               <!-- Команды мероприятия -->
@@ -191,16 +188,7 @@
               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="title"
               type="text"
-              v-model="currentEvent.nameEvent"
-            />
-          </div>
-          <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="location"> Место </label>
-            <input
-              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="location"
-              type="text"
-              v-model="currentEvent.cityEvent"
+              v-model="editedEvent.nameEvent"
             />
           </div>
           <div class="mb-4 cursor-pointer">
@@ -265,7 +253,7 @@
           </button>
           <button
             class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
-            @click="showEditEventModalVisible = false"
+            @click="cancelEditEvent"
           >
             Отмена
           </button>
@@ -292,6 +280,7 @@ export default {
       statuses: ['Активно', 'Неактивно', 'Завершено', 'Отменено'],
       showAddTeamMemberModalVisible: false,
       newTeamName: '',
+      originalEvent: null,
       currentTeam: null,
       newEvent: {
         nameEvent: '',
@@ -355,8 +344,10 @@ export default {
     },
     showEditEventModal(event) {
       this.currentEvent = event
+      this.editedEvent = { ...event } // сохраняем исходное состояние
       this.showEditEventModalVisible = true
     },
+
     showStatusDropdown(event) {
       event.showStatusDropdown = !event.showStatusDropdown
     },
@@ -420,6 +411,11 @@ export default {
         })
       this.showCreateEventModal = false
       this.updateEventStatus()
+    },
+    cancelEditEvent() {
+      this.currentEvent = this.editedEvent // восстанавливаем исходное состояние
+      this.showEditEventModalVisible = false // закрываем модальное окно
+      this.getEvents() // обновляем таблицу
     },
     updateEventStatus() {
       const currentDate = new Date()

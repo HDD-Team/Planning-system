@@ -188,7 +188,16 @@
               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="title"
               type="text"
-              v-model="editedEvent.nameEvent"
+              v-model="currentEvent.nameEvent"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="location"> Место </label>
+            <input
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="location"
+              type="text"
+              v-model="currentEvent.cityEvent"
             />
           </div>
           <div class="mb-4 cursor-pointer">
@@ -344,7 +353,7 @@ export default {
     },
     showEditEventModal(event) {
       this.currentEvent = event
-      this.editedEvent = { ...event } // сохраняем исходное состояние
+      this.originalEvent = { ...event } // сохраняем исходное состояние
       this.showEditEventModalVisible = true
     },
 

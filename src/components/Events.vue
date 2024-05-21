@@ -56,6 +56,27 @@
                   />
                 </svg>
               </button>
+              <button
+                class="text-green-500 hover:text-green-700 focus:outline-none ml-2"
+                @click="showAddTeamModal(event)"
+              >
+                <svg
+                  fill="currentColor"
+                  viewBox="0 0 32 32"
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                >
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <title>plus-user</title>
+                    <path
+                      d="M2.016 28q0 0.832 0.576 1.44t1.408 0.576h14.016v-0.352q-1.792-0.608-2.912-2.176t-1.088-3.488q0-2.016 1.184-3.584t3.072-2.112q0.384-1.216 1.216-2.176t2.016-1.504q0.512-1.376 0.512-2.624v-1.984q0-3.328-2.368-5.664t-5.632-2.336-5.664 2.336-2.336 5.664v1.984q0 2.112 1.024 3.904t2.784 2.912q-1.504 0.544-2.912 1.504t-2.496 2.144-1.76 2.624-0.64 2.912zM18.016 24q0 0.832 0.576 1.44t1.408 0.576h2.016v1.984q0 0.864 0.576 1.44t1.408 0.576 1.408-0.576 0.608-1.44v-1.984h1.984q0.832 0 1.408-0.576t0.608-1.44-0.608-1.408-1.408-0.576h-1.984v-2.016q0-0.832-0.608-1.408t-1.408-0.576-1.408 0.576-0.576 1.408v2.016h-2.016q-0.832 0-1.408 0.576t-0.576 1.408z"
+                    ></path>
+                  </g>
+                </svg>
+              </button>
             </td>
             <td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
               {{ event.nameEvent }}
@@ -75,26 +96,44 @@
                   :href="event.websiteEvent"
                   target="_blank"
                   class="text-blue-500 hover:text-blue-700"
-                  >{{ event.websiteEvent }}</a
                 >
+                  Источник
+                </a>
               </div>
             </td>
-            <td class="whitespace-nowrap px-4 py-2 text-sm text-gray-500">
-              <!-- Команды мероприятия -->
-              <div v-for="teamId in event.teams" :key="teamId">
-                <strong>{{ getTeamName(teamId) }}</strong> (Руководитель:
-                {{ getTeamTeachers(teamId)[0].name }} {{ getTeamTeachers(teamId)[0].surname }},
-                Участники:
-                {{
-                  getTeamStudents(teamId)
-                    .map((student) => student.name + ' ' + student.surname)
-                    .join(', ')
-                }}, Статус: {{ getTeamStatus(teamId) }})
+            <td class="whitespace-nowrap px-4 py-2 text-gray-700">
+              <div v-for="team in event.teams" :key="team.team_id">
+                <strong
+                  >{{ getTeamDataById(team.team_id)?.teamname }}
+                  {{ team.statusParticipation }}</strong
+                >
+                (Руководитель: {{ getTeamDataById(team.team_id)?.teachers }}, Участники:
+                {{ getTeamDataById(team.team_id)?.students }}
               </div>
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+    <div class="mx-auto max-w-screen-xl px-8 py-4">
+      <div class="flex items-center justify-center mt-4">
+        <button
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
+          @click="prevPage"
+          :disabled="page === 1"
+        >
+          Предыдущая
+        </button>
+
+        <span class="mx-2">{{ page }}</span>
+
+        <button
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
+          @click="nextPage"
+        >
+          Следующая
+        </button>
+      </div>
     </div>
 
     <!-- Модальное окно создания мероприятия -->
@@ -269,6 +308,37 @@
         </form>
       </div>
     </div>
+
+    <!-- Модальное окно добавления команды к мероприятию -->
+    <div v-if="showAddTeamModalVisible" class="fixed inset-0 flex items-center justify-center">
+      <div class="bg-white p-6 rounded shadow shadow-lg">
+        <h2 class="text-xl font-bold mb-4">Добавить команду к мероприятию</h2>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="team">Команда</label>
+          <select
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="team"
+            v-model="selectedTeam"
+          >
+            <option v-for="team in availableTeams" :key="team._id" :value="team._id">
+              {{ team.teamname }}
+            </option>
+          </select>
+        </div>
+        <button
+          @click="addTeamToEvent"
+          class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
+        >
+          Добавить
+        </button>
+        <button
+          @click="showAddTeamModalVisible = false"
+          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
+        >
+          Отмена
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -284,6 +354,8 @@ export default {
       showCreateEventModal: false,
       showAddTeamModalVisible: false,
       currentEvent: null,
+      page: 1,
+      limit: 2,
       showEditEventModalVisible: false,
       showDeleteEventModal: false,
       statuses: ['Активно', 'Неактивно', 'Завершено', 'Отменено'],
@@ -298,24 +370,65 @@ export default {
         websiteEvent: '',
         startDateEvent: '', // Новое поле для даты начала
         endDateEvent: '' // Новое поле для даты окончания
-      }
+      },
+      selectedTeam: null,
+      availableTeams: []
     }
   },
   created() {
     this.getEvents()
     this.getTeams()
+    this.getAvailableTeams()
   },
   methods: {
-    getEvents() {
-      axios
-        .get('http://localhost:5000/events')
-        .then((response) => {
-          this.events = response.data
-        })
-        .catch((error) => {
-          console.error(error)
-        })
+    getTeamDataById(team_id) {
+      const team = this.teams.find((team) => team._id.toString() === team_id)
+      if (team) {
+        const teachers = team.teachers.map((t) => `${t.name} ${t.surname}`).join(', ')
+        const students = team.students.map((s) => `${s.name} ${s.surname} (${s.group})`).join(', ')
+        return {
+          teamname: team.teamname,
+          teachers: teachers,
+          students: students,
+          statusParticipation: team.statusParticipation
+        }
+      }
+      return null
     },
+    async getEvents(page = 1, limit = 2) {
+      console.log(`Getting events for page ${page} with limit ${limit}`)
+
+      // Вычисление значения параметра skip
+      const skip = (page - 1) * limit
+
+      try {
+        const response = await axios.get('http://localhost:5000/events', {
+          params: {
+            page,
+            limit,
+            skip // Добавление параметра skip в запрос
+          }
+        })
+        this.events = response.data
+      } catch (error) {
+        console.error(error)
+      }
+    },
+
+    nextPage() {
+      console.log('Next page button clicked')
+
+      this.page++
+      this.getEvents(this.page, this.limit)
+    },
+
+    prevPage() {
+      if (this.page > 1) {
+        this.page -= 1
+        this.getEvents(this.page, this.limit)
+      }
+    },
+
     getTeams() {
       axios
         .get('http://localhost:5000/teams')
@@ -326,31 +439,22 @@ export default {
           console.error(error)
         })
     },
+    getAvailableTeams() {
+      axios
+        .get('http://localhost:5000/teams')
+        .then((response) => {
+          this.availableTeams = response.data
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    },
     formatDate(startDate, endDate) {
       const formattedStartDate = new Date(startDate).toLocaleDateString()
       const formattedEndDate = new Date(endDate).toLocaleDateString()
       return `${formattedStartDate} - ${formattedEndDate}`
     },
-    getTeamName(teamId) {
-      const team = this.teams.find((team) => team._id === teamId)
-      return team.teamname
-    },
-    getTeamTeachers(teamId) {
-      const team = this.teams.find((team) => team._id === teamId)
-      return team.teachers
-    },
-    getTeamStudents(teamId) {
-      const team = this.teams.find((team) => team._id === teamId)
-      return team.students
-    },
-    getTeamStatus(teamId) {
-      const team = this.teams.find((team) => team._id === teamId)
-      return team.statusParticipation
-    },
-    showAddTeamModal(event) {
-      this.currentEvent = event
-      this.showAddTeamModalVisible = true
-    },
+
     showEditEventModal(event) {
       this.currentEvent = event
       this.originalEvent = { ...event } // сохраняем исходное состояние
@@ -360,10 +464,7 @@ export default {
     showStatusDropdown(event) {
       event.showStatusDropdown = !event.showStatusDropdown
     },
-    selectStatus(event, status) {
-      event.selectedStatus = status
-      event.showStatusDropdown = false
-    },
+
     deleteEvent(eventId) {
       if (confirm(`Вы точно хотите удалить с таблицы "${event.title}"?`)) {
         axios
@@ -456,7 +557,54 @@ export default {
             console.error(error)
           })
       })
+    },
+    addTeamToEvent() {
+      // Найти выбранную команду в списке доступных команд
+      const selectedTeam = this.availableTeams.find((team) => team._id === this.selectedTeam)
+
+      // Получить текущее событие
+      const currentEvent = this.events.find((event) => event._id === this.currentEvent._id)
+
+      // Отправить запрос PUT на сервер, чтобы добавить новую команду в существующее событие
+      axios
+        .put(`http://localhost:5000/events/${currentEvent._id}/teams/${selectedTeam._id}`, {
+          statusParticipation: 'Участвуют'
+        })
+        .then((response) => {
+          console.log(response)
+
+          // Обновить текущее событие на клиентской стороне
+          currentEvent.teams.push({
+            team_id: selectedTeam._id,
+            statusParticipation: 'Участвует'
+          })
+
+          // Обновить таблицу событий
+          this.getEvents()
+
+          // Скрыть модальное окно
+          this.showAddTeamModalVisible = false
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    },
+
+    showAddTeamModal(event) {
+      this.currentEvent = event
+      this.showAddTeamModalVisible = true
     }
+  },
+  getStatusColor(status) {
+    const colorMap = {
+      Участвуют: 'text-yellow-500',
+      Проиграли: 'text-red-500',
+      '1 место': 'text-green-500',
+      '2 место': 'text-green-500',
+      '3 место': 'text-green-500'
+    }
+
+    return colorMap[status] || ''
   }
 }
 </script>

@@ -8,6 +8,29 @@
           <p class="mt-1.5 text-sm text-gray-500">Разработано командой HDD🎉</p>
         </div>
 
+        <nav class="mt-4 sm:mt-0 sm:flex sm:items-center sm:justify-center">
+          <a
+            href="/events"
+            class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mx-2"
+          >
+            Мероприятия
+          </a>
+
+          <a
+            href="/teams"
+            class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mx-2"
+          >
+            Команды
+          </a>
+
+          <a
+            href="#"
+            class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mx-2"
+          >
+            Статистика
+          </a>
+        </nav>
+
         <div>
           <div class="mt-4 flex flex-col gap-4 sm:mt-0 sm:flex-row sm:items-center">
             <img

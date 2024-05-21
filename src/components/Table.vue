@@ -1,11 +1,13 @@
 <template>
   <div class="mx-auto max-w-screen-xl px-8 py-4">
+    <h1 class="text-2xl font-bold mb-4 text-white">Команды</h1>
+
     <div>
       <div class="overflow-x-auto rounded-t-lg">
         <table class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
           <thead class="ltr:text-left rtl:text-right">
             <tr>
-              <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">Руководитель</th>
+              <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">Руководители</th>
               <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                 Название команды
               </th>
@@ -16,17 +18,23 @@
           </thead>
 
           <tbody class="divide-y divide-gray-200">
-            <tr v-for="item in items" :key="item._id">
+            <tr v-for="team in teams" :key="team._id">
               <td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                {{ item.teacher.surname }} {{ item.teacher.name }}
+                <ul>
+                  <li v-for="teacher in team.teachers" :key="teacher._id">
+                    {{ teacher.surname }} {{ teacher.name }}
+                  </li>
+                </ul>
               </td>
-              <td class="whitespace-nowrap px-4 py-2 text-gray-700">{{ item.teamname }}</td>
+              <td class="whitespace-nowrap px-4 py-2 text-gray-700">{{ team.teamname }}</td>
               <td class="whitespace-nowrap px-4 py-2 text-gray-700">
-                <span v-for="(student, index) in item.students" :key="index">
-                  {{ student.surname }} {{ student.name }} ({{ student.group }}){{
-                    index < item.students.length - 1 ? ', ' : ''
-                  }}
-                </span>
+                <ul>
+                  <li v-for="(student, index) in team.students" :key="index">
+                    {{ student.surname }} {{ student.name }} ({{ student.group }}){{
+                      index < team.students.length - 1 ? ', ' : ''
+                    }}
+                  </li>
+                </ul>
               </td>
               <td class="whitespace-nowrap px-4 py-2 text-gray-700">
                 <button
@@ -84,85 +92,6 @@
           </tfoot>
         </table>
       </div>
-
-      <div class="rounded-b-lg border-t border-gray-200 px-4 py-2">
-        <ol class="flex justify-end gap-1 text-xs font-medium">
-          <li>
-            <a
-              href="#"
-              class="inline-flex size-8 items-center justify-center rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180"
-            >
-              <span class="sr-only">Prev Page</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-3 w-3"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="#"
-              class="block size-8 rounded border border-gray-100 bg-white text-center leading-8 text-gray-900"
-            >
-              1
-            </a>
-          </li>
-
-          <li
-            class="block size-8 rounded border-blue-600 bg-blue-600 text-center leading-8 text-white"
-          >
-            2
-          </li>
-
-          <li>
-            <a
-              href="#"
-              class="block size-8 rounded border border-gray-100 bg-white text-center leading-8 text-gray-900"
-            >
-              3
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="#"
-              class="block size-8 rounded border border-gray-100 bg-white text-center leading-8 text-gray-900"
-            >
-              4
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="#"
-              class="inline-flex size-8 items-center justify-center rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180"
-            >
-              <span class="sr-only">Next Page</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-3 w-3"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </a>
-          </li>
-        </ol>
-      </div>
     </div>
   </div>
 </template>
@@ -173,18 +102,49 @@ import axios from 'axios'
 export default {
   data() {
     return {
-      items: [],
+      teams: [], // измените этот массив
       editedItem: null
     }
   },
   async created() {
-    await this.getAllItems()
+    await this.getTeams()
+  },
+  mounted() {
+    this.getTeams()
   },
   methods: {
-    async getAllItems() {
+    async getTeams() {
       try {
-        const response = await axios.get('http://localhost:3000/api/cards')
-        this.items = response.data
+        const response = await axios.get('http://localhost:5000/teams')
+        this.teams = response.data
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    async createTeam() {
+      try {
+        const response = await axios.post('http://localhost:5000/teams', this.newTeam)
+        this.teams.push(response.data)
+        this.newTeam = {}
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    async updateTeam(id) {
+      try {
+        const response = await axios.put(`http://localhost:5000/teams/${id}`, this.editedTeam)
+        const index = this.teams.findIndex((team) => team._id === id)
+        this.teams.splice(index, 1, response.data)
+        this.editedTeam = {}
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    async deleteTeam(id) {
+      try {
+        await axios.delete(`http://localhost:3000/teams/${id}`)
+        const index = this.teams.findIndex((team) => team._id === id)
+        this.teams.splice(index, 1)
       } catch (error) {
         console.error(error)
       }

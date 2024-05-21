@@ -1,6 +1,6 @@
 <template>
   <div class="mx-auto max-w-screen-xl px-8 py-4">
-    <h1 class="text-2xl font-bold mb-4">Мероприятия</h1>
+    <h1 class="text-2xl font-bold mb-4 text-white">Мероприятия</h1>
 
     <button
       class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
@@ -125,7 +125,7 @@
           Предыдущая
         </button>
 
-        <span class="mx-2">{{ page }}</span>
+        <span class="mx-2 text-2xl text-white">{{ page }}</span>
 
         <button
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
@@ -313,17 +313,13 @@
     <div v-if="showAddTeamModalVisible" class="fixed inset-0 flex items-center justify-center">
       <div class="bg-white p-6 rounded shadow shadow-lg">
         <h2 class="text-xl font-bold mb-4">Добавить команду к мероприятию</h2>
-        <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-bold mb-2" for="team">Команда</label>
-          <select
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="team"
-            v-model="selectedTeam"
-          >
-            <option v-for="team in availableTeams" :key="team._id" :value="team._id">
-              {{ team.teamname }}
-            </option>
-          </select>
+        <div class="mb-4 max-h-60 overflow-y-auto">
+          <div v-for="team in availableTeams" :key="team._id" class="flex items-center">
+            <input type="checkbox" :value="team._id" v-model="selectedTeams" class="mr-2" />
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="team">{{
+              team.teamname
+            }}</label>
+          </div>
         </div>
         <button
           @click="addTeamToEvent"
@@ -372,6 +368,8 @@ export default {
         endDateEvent: '' // Новое поле для даты окончания
       },
       selectedTeam: null,
+      selectedTeams: [],
+
       availableTeams: []
     }
   },
@@ -559,35 +557,28 @@ export default {
       })
     },
     addTeamToEvent() {
-      // Найти выбранную команду в списке доступных команд
-      const selectedTeam = this.availableTeams.find((team) => team._id === this.selectedTeam)
-
-      // Получить текущее событие
       const currentEvent = this.events.find((event) => event._id === this.currentEvent._id)
 
-      // Отправить запрос PUT на сервер, чтобы добавить новую команду в существующее событие
-      axios
-        .put(`http://localhost:5000/events/${currentEvent._id}/teams/${selectedTeam._id}`, {
-          statusParticipation: 'Участвуют'
-        })
-        .then((response) => {
-          console.log(response)
-
-          // Обновить текущее событие на клиентской стороне
-          currentEvent.teams.push({
-            team_id: selectedTeam._id,
-            statusParticipation: 'Участвует'
+      this.selectedTeams.forEach((team_id) => {
+        axios
+          .put(`http://localhost:5000/events/${currentEvent._id}/teams/${team_id}`, {
+            statusParticipation: 'Участвуют'
           })
+          .then((response) => {
+            console.log(response)
 
-          // Обновить таблицу событий
-          this.getEvents()
+            currentEvent.teams.push({
+              team_id: team_id,
+              statusParticipation: 'Участвует'
+            })
+          })
+          .catch((error) => {
+            console.error(error)
+          })
+      })
 
-          // Скрыть модальное окно
-          this.showAddTeamModalVisible = false
-        })
-        .catch((error) => {
-          console.error(error)
-        })
+      this.showAddTeamModalVisible = false
+      this.selectedTeams = [] // Очистить выбранные команды
     },
 
     showAddTeamModal(event) {
@@ -595,6 +586,7 @@ export default {
       this.showAddTeamModalVisible = true
     }
   },
+
   getStatusColor(status) {
     const colorMap = {
       Участвуют: 'text-yellow-500',

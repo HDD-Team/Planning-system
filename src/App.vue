@@ -10,7 +10,7 @@ import Auth from './components/Auth.vue'
 <template>
   <!-- <Auth /> -->
   <Header />
-  <!-- <Events />
-  <Table /> -->
+  <!-- <Events /> -->
+  <!-- <Table /> -->
   <router-view> </router-view>
 </template>

@@ -6,8 +6,10 @@ import Table from './components/Table.vue'
 // import Calendar from './Calendar.vue'
 import Events from './components/Events.vue'
 import Auth from './components/Auth.vue'
+import statistics from './components/statistics.vue'
 </script>
 <template>
+  <!-- <statistics /> -->
   <!-- <Auth /> -->
   <Header />
   <!-- <Events /> -->

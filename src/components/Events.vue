@@ -115,25 +115,64 @@
         </tbody>
       </table>
     </div>
-    <div class="mx-auto max-w-screen-xl px-8 py-4">
-      <div class="flex items-center justify-center mt-4">
-        <button
-          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
-          @click="prevPage"
-          :disabled="page === 1"
-        >
-          Предыдущая
-        </button>
 
-        <span class="mx-2 text-2xl text-white">{{ page }}</span>
-
-        <button
-          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
-          @click="nextPage"
-        >
-          Следующая
-        </button>
-      </div>
+    <div class="mx-auto max-w-screen-xl px-8 py-4 flex justify-end">
+      <nav aria-label="Pagination">
+        <ul class="flex items-center space-x-2">
+          <li v-if="page > 1">
+            <button
+              @click="prevPage"
+              class="text-gray-500 hover:text-gray-700 transition duration-300 ease-in-out"
+            >
+              <span class="sr-only">Previous</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M12.293 14.293a1 1 0 010 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 111.414 1.414L10.414 10l3.293 3.293a1 1 0 01-1.414 1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+          </li>
+          <li v-for="n in totalPages" :key="n">
+            <button
+              @click="goToPage(n)"
+              :class="{
+                'bg-blue-500 text-white': n === page,
+                'text-gray-700 hover:text-gray-900': n !== page
+              }"
+              class="px-3 py-1 rounded-md transition duration-300 ease-in-out"
+            >
+              {{ n }}
+            </button>
+          </li>
+          <li v-if="page < totalPages">
+            <button
+              @click="nextPage"
+              class="text-gray-500 hover:text-gray-700 transition duration-300 ease-in-out"
+            >
+              <span class="sr-only">Next</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 111.414 1.414L5.414 10l3.293 3.293a1 1 0 010 1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+          </li>
+        </ul>
+      </nav>
     </div>
 
     <!-- Модальное окно создания мероприятия -->
@@ -309,10 +348,10 @@
       </div>
     </div>
 
-    <!-- Модальное окно добавления команды к мероприятию -->
+    <!-- Модальное окно управления командами к мероприятию -->
     <div v-if="showAddTeamModalVisible" class="fixed inset-0 flex items-center justify-center">
       <div class="bg-white p-6 rounded shadow shadow-lg">
-        <h2 class="text-xl font-bold mb-4">Добавить команду к мероприятию</h2>
+        <h2 class="text-xl font-bold mb-4">Управление командами</h2>
         <div class="mb-4 max-h-60 overflow-y-auto">
           <div v-for="team in availableTeams" :key="team._id" class="flex items-center">
             <input type="checkbox" :value="team._id" v-model="selectedTeams" class="mr-2" />
@@ -323,13 +362,13 @@
         </div>
         <button
           @click="addTeamToEvent"
-          class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
+          class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4"
         >
-          Добавить
+          Сохранить изменения
         </button>
         <button
           @click="showAddTeamModalVisible = false"
-          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
+          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-4"
         >
           Отмена
         </button>
@@ -337,7 +376,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import axios from 'axios'
 
@@ -351,7 +389,8 @@ export default {
       showAddTeamModalVisible: false,
       currentEvent: null,
       page: 1,
-      limit: 2,
+      limit: 10,
+      totalPages: 1,
       showEditEventModalVisible: false,
       showDeleteEventModal: false,
       statuses: ['Активно', 'Неактивно', 'Завершено', 'Отменено'],
@@ -369,14 +408,25 @@ export default {
       },
       selectedTeam: null,
       selectedTeams: [],
-
       availableTeams: []
     }
   },
   created() {
+    this.page = parseInt(this.$route.query.page) || 1
+    this.limit = parseInt(this.$route.query.limit) || 10
     this.getEvents()
     this.getTeams()
     this.getAvailableTeams()
+  },
+  watch: {
+    '$route.query.page'(newPage) {
+      this.page = parseInt(newPage) || 1
+      this.getEvents()
+    },
+    '$route.query.limit'(newLimit) {
+      this.limit = parseInt(newLimit) || 10
+      this.getEvents()
+    }
   },
   methods: {
     getTeamDataById(team_id) {
@@ -393,40 +443,42 @@ export default {
       }
       return null
     },
-    async getEvents(page = 1, limit = 2) {
+    async getEvents(page = this.page, limit = this.limit) {
       console.log(`Getting events for page ${page} with limit ${limit}`)
-
-      // Вычисление значения параметра skip
-      const skip = (page - 1) * limit
 
       try {
         const response = await axios.get('http://localhost:5000/events', {
           params: {
             page,
-            limit,
-            skip // Добавление параметра skip в запрос
+            limit
           }
         })
-        this.events = response.data
+        this.events = response.data.events
+        this.totalPages = response.data.total_pages
+        this.page = response.data.current_page
+        this.$router.push({ query: { page: this.page, limit: this.limit } })
       } catch (error) {
         console.error(error)
       }
     },
-
     nextPage() {
-      console.log('Next page button clicked')
-
-      this.page++
-      this.getEvents(this.page, this.limit)
-    },
-
-    prevPage() {
-      if (this.page > 1) {
-        this.page -= 1
+      if (this.page < this.totalPages) {
+        this.page++
         this.getEvents(this.page, this.limit)
       }
     },
-
+    prevPage() {
+      if (this.page > 1) {
+        this.page--
+        this.getEvents(this.page, this.limit)
+      }
+    },
+    goToPage(page) {
+      if (page !== this.page) {
+        this.page = page
+        this.getEvents(this.page, this.limit)
+      }
+    },
     getTeams() {
       axios
         .get('http://localhost:5000/teams')
@@ -452,19 +504,16 @@ export default {
       const formattedEndDate = new Date(endDate).toLocaleDateString()
       return `${formattedStartDate} - ${formattedEndDate}`
     },
-
     showEditEventModal(event) {
       this.currentEvent = event
       this.originalEvent = { ...event } // сохраняем исходное состояние
       this.showEditEventModalVisible = true
     },
-
     showStatusDropdown(event) {
       event.showStatusDropdown = !event.showStatusDropdown
     },
-
     deleteEvent(eventId) {
-      if (confirm(`Вы точно хотите удалить с таблицы "${event.title}"?`)) {
+      if (confirm(`Вы точно хотите удалить мероприятие "${eventId}"?`)) {
         axios
           .delete(`http://localhost:5000/events/${eventId}`)
           .then((response) => {
@@ -556,47 +605,59 @@ export default {
           })
       })
     },
-    addTeamToEvent() {
-      const currentEvent = this.events.find((event) => event._id === this.currentEvent._id)
+    async addTeamToEvent() {
+      const currentEvent = this.currentEvent
 
-      this.selectedTeams.forEach((team_id) => {
-        axios
-          .put(`http://localhost:5000/events/${currentEvent._id}/teams/${team_id}`, {
-            statusParticipation: 'Участвуют'
-          })
-          .then((response) => {
-            console.log(response)
-
+      try {
+        // Добавление новых команд
+        for (const team_id of this.selectedTeams) {
+          const exists = currentEvent.teams.some((t) => t.team_id === team_id)
+          if (!exists) {
+            await axios.put(`http://localhost:5000/events/${currentEvent._id}/teams/${team_id}`, {
+              statusParticipation: 'Участвуют'
+            })
             currentEvent.teams.push({
               team_id: team_id,
-              statusParticipation: 'Участвует'
+              statusParticipation: 'Участвуют'
             })
-          })
-          .catch((error) => {
-            console.error(error)
-          })
-      })
+          }
+        }
 
-      this.showAddTeamModalVisible = false
-      this.selectedTeams = [] // Очистить выбранные команды
+        // Удаление команд, которые были убраны
+        const removedTeams = currentEvent.teams.filter(
+          (t) => !this.selectedTeams.includes(t.team_id)
+        )
+        for (const team of removedTeams) {
+          await axios.delete(
+            `http://localhost:5000/events/${currentEvent._id}/teams/${team.team_id}`
+          )
+          currentEvent.teams = currentEvent.teams.filter((t) => t.team_id !== team.team_id)
+        }
+
+        this.getEvents() // Обновить список мероприятий после изменения команды
+      } catch (error) {
+        console.error(error)
+      } finally {
+        this.showAddTeamModalVisible = false
+        this.selectedTeams = [] // Очистить выбранные команды
+      }
     },
-
     showAddTeamModal(event) {
       this.currentEvent = event
+      this.selectedTeams = event.teams.map((team) => team.team_id)
       this.showAddTeamModalVisible = true
-    }
-  },
+    },
+    getStatusColor(status) {
+      const colorMap = {
+        Участвуют: 'text-yellow-500',
+        Проиграли: 'text-red-500',
+        '1 место': 'text-green-500',
+        '2 место': 'text-green-500',
+        '3 место': 'text-green-500'
+      }
 
-  getStatusColor(status) {
-    const colorMap = {
-      Участвуют: 'text-yellow-500',
-      Проиграли: 'text-red-500',
-      '1 место': 'text-green-500',
-      '2 место': 'text-green-500',
-      '3 место': 'text-green-500'
+      return colorMap[status] || ''
     }
-
-    return colorMap[status] || ''
   }
 }
 </script>

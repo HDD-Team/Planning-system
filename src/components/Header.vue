@@ -39,8 +39,8 @@
               class="w-12 h-12 rounded-full mr-4"
             />
             <div>
-              <p class="font-bold text-lg">Далиба Богдан</p>
-              <p class="text-sm">HDD@gmail.com</p>
+              <p class="font-bold text-lg">Богдан</p>
+              <p class="text-sm">@gmail.com</p>
               <button
                 class="mt-2 inline-flex items-center justify-center px-2 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 @click="logout"

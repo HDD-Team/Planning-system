@@ -25,7 +25,7 @@
 
           <tbody class="divide-y divide-gray-200">
             <tr v-for="team in teams" :key="team._id">
-              <td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+              <td class="whitespace-nowrap px-4 py-2 text-gray-900">
                 <ul>
                   <li v-for="teacher in team.teachers" :key="teacher._id">
                     {{ teacher.surname }} {{ teacher.name }}

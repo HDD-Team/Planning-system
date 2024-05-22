@@ -108,7 +108,7 @@
                   {{ team.statusParticipation }}</strong
                 >
                 (Руководитель: {{ getTeamDataById(team.team_id)?.teachers }}, Участники:
-                {{ getTeamDataById(team.team_id)?.students }}
+                {{ getTeamDataById(team.team_id)?.students }})
               </div>
             </td>
           </tr>

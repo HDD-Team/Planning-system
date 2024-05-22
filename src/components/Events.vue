@@ -2,12 +2,32 @@
   <div class="mx-auto max-w-screen-xl px-8 py-4">
     <h1 class="text-2xl font-bold mb-4 text-white">Мероприятия</h1>
 
-    <button
-      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
-      @click="showCreateEventModal = true"
-    >
-      Создать мероприятие
-    </button>
+    <div class="flex justify-between items-center mb-4">
+      <button
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        @click="showCreateEventModal = true"
+      >
+        Создать мероприятие
+      </button>
+      <button
+        class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+        @click="showFilterModal = true"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 inline-block mr-2"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-.293.707L13 9.414V14a1 1 0 01-.293.707l-3 3A1 1 0 018 17v-7.586l-2.707-2.707A1 1 0 015 6V4z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        Фильтр
+      </button>
+    </div>
 
     <div class="overflow-x-auto rounded-t-lg">
       <table class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
@@ -52,7 +72,7 @@
                   fill="currentColor"
                 >
                   <path
-                    d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zM14.586 8l-2.293-2.293a1 1 0 00-1.414 0L10 10.586 7.707 8.293a1 1 0 10-1.414 1.414L10 11.414l2.293 2.293a1 1 0 001.414 0L14.586 10l-1.293-1.293z"
+                    d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zM14.586 8l-2.293-2.293a1 1 0 00-1.414 0L10 10.586 7.707 8.293a1 1 0 10-1.414 1.414L10 11.414l2.293 2.293a1 1 001.414 0L14.586 10l-1.293-1.293z"
                   />
                 </svg>
               </button>
@@ -78,7 +98,11 @@
                 </svg>
               </button>
             </td>
-            <td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+            <td
+              class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 cursor-pointer"
+              :class="{ 'cursor-pointer': event.statusEvent === 'Завершено' }"
+              @click="showEventReportModal(event)"
+            >
               {{ event.nameEvent }}
             </td>
             <td class="whitespace-nowrap px-4 py-2 text-gray-700">{{ event.cityEvent }}</td>
@@ -103,11 +127,17 @@
             </td>
             <td class="whitespace-nowrap px-4 py-2 text-gray-700">
               <div v-for="team in event.teams" :key="team.team_id">
-                <strong
-                  >{{ getTeamDataById(team.team_id)?.teamname }}
-                  {{ team.statusParticipation }}</strong
-                >
-                (Руководитель: {{ getTeamDataById(team.team_id)?.teachers }}, Участники:
+                <strong>
+                  {{ getTeamDataById(team.team_id)?.teamname }}
+                  <span
+                    :class="getStatusColor(team.statusParticipation)"
+                    @click="showChangeStatusModal(event, team)"
+                    class="cursor-pointer"
+                  >
+                    {{ team.statusParticipation }}
+                  </span>
+                </strong>
+                (Руководитель: {{ getTeamDataById(team.team_id)?.teachers }} Участники:
                 {{ getTeamDataById(team.team_id)?.students }})
               </div>
             </td>
@@ -115,7 +145,6 @@
         </tbody>
       </table>
     </div>
-
     <div class="mx-auto max-w-screen-xl px-8 py-4 flex justify-end">
       <nav aria-label="Pagination">
         <ul class="flex items-center space-x-2">
@@ -133,7 +162,7 @@
               >
                 <path
                   fill-rule="evenodd"
-                  d="M12.293 14.293a1 1 0 010 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 111.414 1.414L10.414 10l3.293 3.293a1 1 0 01-1.414 1.414z"
+                  d="M12.293 14.293a1 1 0 010 1.414l-4-4a1 1 010-1.414l4-4a1 1 011.414 1.414L10.414 10l3.293 3.293a1 1 01-1.414 1.414z"
                   clip-rule="evenodd"
                 />
               </svg>
@@ -165,7 +194,7 @@
               >
                 <path
                   fill-rule="evenodd"
-                  d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 111.414 1.414L5.414 10l3.293 3.293a1 1 0 010 1.414z"
+                  d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 010-1.414l4-4a1 1 011.414 1.414L5.414 10l3.293 3.293a1 1 010 1.414z"
                   clip-rule="evenodd"
                 />
               </svg>
@@ -317,7 +346,7 @@
               <option>Отменено</option>
             </select>
             <p v-if="currentEvent.statusEvent === 'Отменено'" class="text-xs text-gray-500">
-              Чтобы вернуть к предыдущему статусу, выберите его в списке.
+              Чтобы вернуть к предыдущему статусу выберите его в списке.
             </p>
           </div>
 
@@ -348,7 +377,7 @@
       </div>
     </div>
 
-    <!-- Модальное окно управления командами к мероприятию -->
+    <!-- Модальное окно добавления команды к мероприятию -->
     <div v-if="showAddTeamModalVisible" class="fixed inset-0 flex items-center justify-center">
       <div class="bg-white p-6 rounded shadow shadow-lg">
         <h2 class="text-xl font-bold mb-4">Управление командами</h2>
@@ -362,31 +391,164 @@
         </div>
         <button
           @click="addTeamToEvent"
-          class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4"
+          class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
         >
           Сохранить изменения
         </button>
         <button
           @click="showAddTeamModalVisible = false"
-          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-4"
+          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
         >
           Отмена
         </button>
       </div>
     </div>
+
+    <!-- Модальное окно изменения статуса команды -->
+    <div v-if="showChangeStatusModalVisible" class="fixed inset-0 flex items-center justify-center">
+      <div class="bg-white p-6 rounded shadow shadow-lg">
+        <h2 class="text-xl font-bold mb-4">Изменить статус команды</h2>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="status"> Статус </label>
+          <select
+            class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+            id="status"
+            v-model="selectedTeam.statusParticipation"
+          >
+            <option value="">Выберите статус</option>
+            <option>Участвуют</option>
+            <option>1 место</option>
+            <option>2 место</option>
+            <option>3 место</option>
+            <option>Проиграли</option>
+            <option>Не участвовали</option>
+          </select>
+        </div>
+        <button
+          @click="changeTeamStatus"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
+        >
+          Сохранить
+        </button>
+        <button
+          @click="showChangeStatusModalVisible = false"
+          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
+        >
+          Отмена
+        </button>
+      </div>
+    </div>
+
+    <!-- Модальное окно фильтрации -->
+    <div v-if="showFilterModal" class="fixed inset-0 flex items-center justify-center">
+      <div class="bg-white p-6 rounded shadow shadow-lg">
+        <h2 class="text-xl font-bold mb-4">Фильтрация мероприятий</h2>
+        <div class="mb-4">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Поиск"
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="startDate">
+            Дата начала
+          </label>
+          <input
+            v-model="filter.startDate"
+            type="date"
+            id="startDate"
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="endDate">
+            Дата конца
+          </label>
+          <input
+            v-model="filter.endDate"
+            type="date"
+            id="endDate"
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="status"> Статус </label>
+          <select
+            v-model="filter.status"
+            id="status"
+            class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          >
+            <option value="">Выберите статус</option>
+            <option>Активно</option>
+            <option>Неактивно</option>
+            <option>Завершено</option>
+            <option>Отменено</option>
+          </select>
+        </div>
+        <button
+          @click="applyFilters"
+          class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
+        >
+          Применить
+        </button>
+        <button
+          @click="clearFilters"
+          class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
+        >
+          Очистить
+        </button>
+        <button
+          @click="showFilterModal = false"
+          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
+        >
+          Отмена
+        </button>
+      </div>
+    </div>
+
+    <!-- Модальное окно отчета мероприятия -->
+    <div v-if="showEventReportModalVisible" class="fixed inset-0 flex items-center justify-center">
+      <div class="bg-white p-6 rounded shadow shadow-lg">
+        <h2 class="text-xl font-bold mb-4">Отчет мероприятия</h2>
+        <div class="mb-4">
+          <p><strong>Мероприятие:</strong> {{ currentEvent.nameEvent }}</p>
+          <p><strong>Город:</strong> {{ currentEvent.cityEvent }}</p>
+          <p>
+            <strong>Даты:</strong>
+            {{ formatDate(currentEvent.startDateEvent, currentEvent.endDateEvent) }}
+          </p>
+          <div v-for="team in currentEvent.teams" :key="team.team_id">
+            <p><strong>Команда:</strong> {{ getTeamDataById(team.team_id)?.teamname }}</p>
+            <p><strong>Руководители:</strong> {{ getTeamDataById(team.team_id)?.teachers }}</p>
+            <p><strong>Участники:</strong> {{ getTeamDataById(team.team_id)?.students }}</p>
+            <p><strong>Статус:</strong> {{ team.statusParticipation }}</p>
+          </div>
+        </div>
+        <button
+          @click="showEventReportModalVisible = false"
+          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
+        >
+          Закрыть
+        </button>
+      </div>
+    </div>
   </div>
 </template>
+
 <script>
 import axios from 'axios'
 
 export default {
-  name: 'DataTable',
+  name: 'Events',
   data() {
     return {
       events: [],
       teams: [],
       showCreateEventModal: false,
       showAddTeamModalVisible: false,
+      showFilterModal: false,
       currentEvent: null,
       page: 1,
       limit: 10,
@@ -408,7 +570,15 @@ export default {
       },
       selectedTeam: null,
       selectedTeams: [],
-      availableTeams: []
+      availableTeams: [],
+      searchQuery: '', // Поле для поискового запроса
+      filter: {
+        startDate: '',
+        endDate: '',
+        status: ''
+      }, // Фильтры для даты и статуса
+      showChangeStatusModalVisible: false,
+      showEventReportModalVisible: false
     }
   },
   created() {
@@ -432,8 +602,8 @@ export default {
     getTeamDataById(team_id) {
       const team = this.teams.find((team) => team._id.toString() === team_id)
       if (team) {
-        const teachers = team.teachers.map((t) => `${t.name} ${t.surname}`).join(', ')
-        const students = team.students.map((s) => `${s.name} ${s.surname} (${s.group})`).join(', ')
+        const teachers = team.teachers.map((t) => `${t.name} ${t.surname}`).join(' ')
+        const students = team.students.map((s) => `${s.name} ${s.surname} (${s.group})`).join(' ')
         return {
           teamname: team.teamname,
           teachers: teachers,
@@ -450,7 +620,11 @@ export default {
         const response = await axios.get('http://localhost:5000/events', {
           params: {
             page,
-            limit
+            limit,
+            search: this.searchQuery,
+            startDate: this.filter.startDate,
+            endDate: this.filter.endDate,
+            status: this.filter.status
           }
         })
         this.events = response.data.events
@@ -552,20 +726,21 @@ export default {
         this.newEvent.statusEvent = 'Неактивно'
       }
 
+      // Добавление нового мероприятия
       axios
-        .post('http://localhost:5000/events', this.newEvent)
+        .post('http://localhost:5000/events', { ...this.newEvent, teams: [] }) // Инициализация массива teams
         .then((response) => {
           console.log(response)
-          this.getEvents()
-          this.newEvent.nameEvent = ''
-          this.newEvent.cityEvent = ''
-          this.newEvent.dateEvent = ''
-          this.newEvent.statusEvent = ''
-          this.newEvent.websiteEvent = ''
+          // Добавление нового мероприятия в начало массива events
+          const newEvent = response.data
+          this.events.unshift(newEvent)
+          this.currentEvent = newEvent // Установить текущее мероприятие на новое
+          this.getAvailableTeams()
         })
         .catch((error) => {
           console.error(error)
         })
+
       this.showCreateEventModal = false
       this.updateEventStatus()
     },
@@ -608,11 +783,16 @@ export default {
     async addTeamToEvent() {
       const currentEvent = this.currentEvent
 
+      if (!currentEvent.teams) {
+        currentEvent.teams = []
+      }
+
       try {
         // Добавление новых команд
         for (const team_id of this.selectedTeams) {
           const exists = currentEvent.teams.some((t) => t.team_id === team_id)
           if (!exists) {
+            console.log(`Adding team with ID: ${team_id}`)
             await axios.put(`http://localhost:5000/events/${currentEvent._id}/teams/${team_id}`, {
               statusParticipation: 'Участвуют'
             })
@@ -623,40 +803,112 @@ export default {
           }
         }
 
-        // Удаление команд, которые были убраны
+        // Удаление команд, которые были убраны из выбранных
         const removedTeams = currentEvent.teams.filter(
           (t) => !this.selectedTeams.includes(t.team_id)
         )
         for (const team of removedTeams) {
-          await axios.delete(
-            `http://localhost:5000/events/${currentEvent._id}/teams/${team.team_id}`
-          )
-          currentEvent.teams = currentEvent.teams.filter((t) => t.team_id !== team.team_id)
+          try {
+            console.log(`Removing team with ID: ${team.team_id}`)
+            const response = await axios.delete(
+              `http://localhost:5000/events/${currentEvent._id}/teams/${team.team_id}`
+            )
+            if (response.status === 200) {
+              currentEvent.teams = currentEvent.teams.filter((t) => t.team_id !== team.team_id)
+            }
+          } catch (error) {
+            console.error(
+              'Error removing team from event:',
+              error.response ? error.response.data : error
+            )
+          }
         }
 
-        this.getEvents() // Обновить список мероприятий после изменения команды
+        this.getEvents()
       } catch (error) {
-        console.error(error)
+        console.error('Error adding team to event:', error.response ? error.response.data : error)
       } finally {
         this.showAddTeamModalVisible = false
-        this.selectedTeams = [] // Очистить выбранные команды
+        this.selectedTeams = []
       }
     },
     showAddTeamModal(event) {
       this.currentEvent = event
-      this.selectedTeams = event.teams.map((team) => team.team_id)
+      this.selectedTeams = (event.teams || []).map((team) => team.team_id)
       this.showAddTeamModalVisible = true
+    },
+    showChangeStatusModal(event, team) {
+      this.currentEvent = event
+      this.selectedTeam = { ...team } // Создаем копию объекта команды
+      this.showChangeStatusModalVisible = true
+    },
+    async changeTeamStatus() {
+      const team = this.currentEvent.teams.find((t) => t.team_id === this.selectedTeam.team_id)
+      if (team) {
+        team.statusParticipation = this.selectedTeam.statusParticipation
+        try {
+          await axios.put(
+            `http://localhost:5000/events/${this.currentEvent._id}/teams/${team.team_id}`,
+            {
+              statusParticipation: team.statusParticipation
+            }
+          )
+          this.getEvents()
+        } catch (error) {
+          console.error(error)
+        }
+      }
+      this.showChangeStatusModalVisible = false
     },
     getStatusColor(status) {
       const colorMap = {
-        Участвуют: 'text-yellow-500',
-        Проиграли: 'text-red-500',
         '1 место': 'text-green-500',
         '2 место': 'text-green-500',
-        '3 место': 'text-green-500'
+        '3 место': 'text-green-500',
+        Участвуют: 'text-orange-500',
+        'Не участвовали': 'text-red-500',
+        Проиграли: 'text-red-500'
       }
 
       return colorMap[status] || ''
+    },
+    async deleteTeamFromEvent(event_id, team_id) {
+      try {
+        const response = await axios.delete(
+          `http://localhost:5000/events/${event_id}/teams/${team_id}`
+        )
+        if (response.status === 200) {
+          const event = this.events.find((e) => e._id === event_id)
+          if (event) {
+            event.teams = event.teams.filter((t) => t.team_id !== team_id)
+          }
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    toggleFilterModal() {
+      this.showFilterModal = !this.showFilterModal
+    },
+    applyFilters() {
+      this.page = 1
+      this.getEvents()
+      this.showFilterModal = false
+    },
+    clearFilters() {
+      this.filter = {
+        startDate: '',
+        endDate: '',
+        status: ''
+      }
+      this.getEvents()
+      this.showFilterModal = false
+    },
+    showEventReportModal(event) {
+      if (event.statusEvent === 'Завершено') {
+        this.currentEvent = event
+        this.showEventReportModalVisible = true
+      }
     }
   }
 }

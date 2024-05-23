@@ -24,14 +24,14 @@
           </a>
 
           <a
-            href="#"
+            href="/statistics"
             class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mx-2"
           >
             Статистика
           </a>
         </nav>
 
-        <div>
+        <div v-if="user">
           <div class="mt-4 flex flex-col gap-4 sm:mt-0 sm:flex-row sm:items-center">
             <img
               src="https://pushinka.top/uploads/posts/2023-04/1680574699_pushinka-top-p-avatarka-khottabich-avatarka-pinterest-47.jpg"
@@ -39,8 +39,8 @@
               class="w-12 h-12 rounded-full mr-4"
             />
             <div>
-              <p class="font-bold text-lg">Богдан</p>
-              <p class="text-sm">@gmail.com</p>
+              <p class="font-bold text-lg">{{ user.name }} {{ user.surname }}</p>
+              <p class="text-sm">{{ user.email }}</p>
               <button
                 class="mt-2 inline-flex items-center justify-center px-2 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 @click="logout"
@@ -55,3 +55,26 @@
     </div>
   </header>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      user: null
+    }
+  },
+  created() {
+    const user = localStorage.getItem('user')
+    if (user) {
+      this.user = JSON.parse(user)
+    }
+  },
+  methods: {
+    logout() {
+      localStorage.removeItem('user')
+      this.user = null
+      this.$router.push({ name: 'Login' })
+    }
+  }
+}
+</script>

@@ -81,26 +81,20 @@
                 @click="showAddTeamModal(event)"
               >
                 <svg
-                  fill="currentColor"
-                  viewBox="0 0 32 32"
-                  version="1.1"
                   xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
                   class="h-5 w-5"
                 >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                  <g id="SVGRepo_iconCarrier">
-                    <title>plus-user</title>
-                    <path
-                      d="M2.016 28q0 0.832 0.576 1.44t1.408 0.576h14.016v-0.352q-1.792-0.608-2.912-2.176t-1.088-3.488q0-2.016 1.184-3.584t3.072-2.112q0.384-1.216 1.216-2.176t2.016-1.504q0.512-1.376 0.512-2.624v-1.984q0-3.328-2.368-5.664t-5.632-2.336-5.664 2.336-2.336 5.664v1.984q0 2.112 1.024 3.904t2.784 2.912q-1.504 0.544-2.912 1.504t-2.496 2.144-1.76 2.624-0.64 2.912zM18.016 24q0 0.832 0.576 1.44t1.408 0.576h2.016v1.984q0 0.864 0.576 1.44t1.408 0.576 1.408-0.576 0.608-1.44v-1.984h1.984q0.832 0 1.408-0.576t0.608-1.44-0.608-1.408-1.408-0.576h-1.984v-2.016q0-0.832-0.608-1.408t-1.408-0.576-1.408 0.576-0.576 1.408v2.016h-2.016q-0.832 0-1.408 0.576t-0.576 1.408z"
-                    ></path>
-                  </g>
+                  <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                  />
                 </svg>
               </button>
             </td>
             <td
-              class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 cursor-pointer"
-              :class="{ 'cursor-pointer': event.statusEvent === 'Завершено' }"
+              class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 cursor-pointer hover:underline"
+              :class="{ 'cursor-pointer ': event.statusEvent === 'Завершено' }"
               @click="showEventReportModal(event)"
             >
               {{ event.nameEvent }}
@@ -128,11 +122,16 @@
             <td class="whitespace-nowrap px-4 py-2 text-gray-700">
               <div v-for="team in event.teams" :key="team.team_id">
                 <strong>
-                  {{ getTeamDataById(team.team_id)?.teamname }}
+                  <strong
+                    @click="goToTeamDetails(team.team_id)"
+                    class="cursor-pointer hover:underline inline-block mr-1"
+                  >
+                    {{ getTeamDataById(team.team_id)?.teamname }}
+                  </strong>
                   <span
                     :class="getStatusColor(team.statusParticipation)"
                     @click="showChangeStatusModal(event, team)"
-                    class="cursor-pointer"
+                    class="cursor-pointer hover:underline"
                   >
                     {{ team.statusParticipation }}
                   </span>
@@ -173,7 +172,7 @@
               @click="goToPage(n)"
               :class="{
                 'bg-blue-500 text-white': n === page,
-                'text-gray-700 hover:text-gray-900': n !== page
+                'text-gray-700 hover:text-gray-900 text-white': n !== page
               }"
               class="px-3 py-1 rounded-md transition duration-300 ease-in-out"
             >
@@ -205,7 +204,10 @@
     </div>
 
     <!-- Модальное окно создания мероприятия -->
-    <div v-if="showCreateEventModal" class="fixed inset-0 flex items-center justify-center">
+    <div
+      v-if="showCreateEventModal"
+      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+    >
       <div class="bg-white p-6 rounded shadow shadow-lg">
         <h2 class="text-xl font-bold mb-4">Создать мероприятие</h2>
         <!-- Форма создания мероприятия -->
@@ -284,7 +286,10 @@
     </div>
 
     <!-- Модальное окно редактирования мероприятия -->
-    <div v-if="showEditEventModalVisible" class="fixed inset-0 flex items-center justify-center">
+    <div
+      v-if="showEditEventModalVisible"
+      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+    >
       <div class="bg-white p-6 rounded shadow shadow-lg">
         <h2 class="text-xl font-bold mb-4">Редактировать мероприятие</h2>
         <!-- Форма редактирования мероприятия -->
@@ -378,7 +383,10 @@
     </div>
 
     <!-- Модальное окно добавления команды к мероприятию -->
-    <div v-if="showAddTeamModalVisible" class="fixed inset-0 flex items-center justify-center">
+    <div
+      v-if="showAddTeamModalVisible"
+      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+    >
       <div class="bg-white p-6 rounded shadow shadow-lg">
         <h2 class="text-xl font-bold mb-4">Управление командами</h2>
         <div class="mb-4 max-h-60 overflow-y-auto">
@@ -405,7 +413,10 @@
     </div>
 
     <!-- Модальное окно изменения статуса команды -->
-    <div v-if="showChangeStatusModalVisible" class="fixed inset-0 flex items-center justify-center">
+    <div
+      v-if="showChangeStatusModalVisible"
+      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+    >
       <div class="bg-white p-6 rounded shadow shadow-lg">
         <h2 class="text-xl font-bold mb-4">Изменить статус команды</h2>
         <div class="mb-4">
@@ -440,7 +451,10 @@
     </div>
 
     <!-- Модальное окно фильтрации -->
-    <div v-if="showFilterModal" class="fixed inset-0 flex items-center justify-center">
+    <div
+      v-if="showFilterModal"
+      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+    >
       <div class="bg-white p-6 rounded shadow shadow-lg">
         <h2 class="text-xl font-bold mb-4">Фильтрация мероприятий</h2>
         <div class="mb-4">
@@ -509,7 +523,10 @@
     </div>
 
     <!-- Модальное окно отчета мероприятия -->
-    <div v-if="showEventReportModalVisible" class="fixed inset-0 flex items-center justify-center">
+    <div
+      v-if="showEventReportModalVisible"
+      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+    >
       <div class="bg-white p-6 rounded shadow shadow-lg">
         <h2 class="text-xl font-bold mb-4">Отчет мероприятия</h2>
         <div class="mb-4">
@@ -519,7 +536,8 @@
             <strong>Даты:</strong>
             {{ formatDate(currentEvent.startDateEvent, currentEvent.endDateEvent) }}
           </p>
-          <div v-for="team in currentEvent.teams" :key="team.team_id">
+          <hr class="my-4" />
+          <div v-for="team in currentEvent.teams" :key="team.team_id" class="mb-4 border-b-2 pb-4">
             <p><strong>Команда:</strong> {{ getTeamDataById(team.team_id)?.teamname }}</p>
             <p><strong>Руководители:</strong> {{ getTeamDataById(team.team_id)?.teachers }}</p>
             <p><strong>Участники:</strong> {{ getTeamDataById(team.team_id)?.students }}</p>
@@ -527,8 +545,14 @@
           </div>
         </div>
         <button
+          @click="copyReport"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+        >
+          Копировать
+        </button>
+        <button
           @click="showEventReportModalVisible = false"
-          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded rounded mb-4"
+          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-4"
         >
           Закрыть
         </button>
@@ -565,18 +589,18 @@ export default {
         cityEvent: '',
         statusEvent: '',
         websiteEvent: '',
-        startDateEvent: '', // Новое поле для даты начала
-        endDateEvent: '' // Новое поле для даты окончания
+        startDateEvent: '',
+        endDateEvent: ''
       },
       selectedTeam: null,
       selectedTeams: [],
       availableTeams: [],
-      searchQuery: '', // Поле для поискового запроса
+      searchQuery: '',
       filter: {
         startDate: '',
         endDate: '',
         status: ''
-      }, // Фильтры для даты и статуса
+      },
       showChangeStatusModalVisible: false,
       showEventReportModalVisible: false
     }
@@ -599,11 +623,45 @@ export default {
     }
   },
   methods: {
+    copyReport() {
+      const reportText = `
+        Мероприятие: ${this.currentEvent.nameEvent}
+        Город: ${this.currentEvent.cityEvent}
+        Даты: ${this.formatDate(this.currentEvent.startDateEvent, this.currentEvent.endDateEvent)}
+        ${this.currentEvent.teams
+          .map((team) => {
+            const teamData = this.getTeamDataById(team.team_id)
+            return `
+            Команда: ${teamData.teamname}
+            Руководители: ${teamData.teachers}
+            Участники: ${teamData.students}
+            Статус: ${team.statusParticipation}
+          `
+          })
+          .join('\n')}
+      `
+      navigator.clipboard.writeText(reportText).then(
+        () => {
+          alert('Отчет скопирован в буфер обмена')
+        },
+        (err) => {
+          alert('Ошибка копирования отчета: ' + err)
+        }
+      )
+    },
+    formatTeachers(teachers) {
+      if (!teachers) return ''
+      return teachers.map((t) => `${t.surname} ${t.name}`).join(', ')
+    },
+    formatStudents(students) {
+      if (!students) return ''
+      return students.map((s) => `${s.surname} ${s.name} (${s.group})`).join(', ')
+    },
     getTeamDataById(team_id) {
       const team = this.teams.find((team) => team._id.toString() === team_id)
       if (team) {
-        const teachers = team.teachers.map((t) => `${t.name} ${t.surname}`).join(' ')
-        const students = team.students.map((s) => `${s.name} ${s.surname} (${s.group})`).join(' ')
+        const teachers = team.teachers.map((t) => `${t.surname} ${t.name}`).join(', ')
+        const students = team.students.map((s) => `${s.surname} ${s.name} (${s.group})`).join(', ')
         return {
           teamname: team.teamname,
           teachers: teachers,
@@ -680,14 +738,14 @@ export default {
     },
     showEditEventModal(event) {
       this.currentEvent = event
-      this.originalEvent = { ...event } // сохраняем исходное состояние
+      this.originalEvent = { ...event }
       this.showEditEventModalVisible = true
     },
     showStatusDropdown(event) {
       event.showStatusDropdown = !event.showStatusDropdown
     },
     deleteEvent(eventId) {
-      if (confirm(`Вы точно хотите удалить мероприятие "${eventId}"?`)) {
+      if (confirm(`Вы точно хотите удалить мероприятие ?`)) {
         axios
           .delete(`http://localhost:5000/events/${eventId}`)
           .then((response) => {
@@ -734,7 +792,7 @@ export default {
           // Добавление нового мероприятия в начало массива events
           const newEvent = response.data
           this.events.unshift(newEvent)
-          this.currentEvent = newEvent // Установить текущее мероприятие на новое
+          this.currentEvent = newEvent
           this.getAvailableTeams()
         })
         .catch((error) => {
@@ -745,9 +803,9 @@ export default {
       this.updateEventStatus()
     },
     cancelEditEvent() {
-      this.currentEvent = this.editedEvent // восстанавливаем исходное состояние
-      this.showEditEventModalVisible = false // закрываем модальное окно
-      this.getEvents() // обновляем таблицу
+      this.currentEvent = this.editedEvent
+      this.showEditEventModalVisible = false
+      this.getEvents()
     },
     updateEventStatus() {
       const currentDate = new Date()
@@ -839,7 +897,7 @@ export default {
     },
     showChangeStatusModal(event, team) {
       this.currentEvent = event
-      this.selectedTeam = { ...team } // Создаем копию объекта команды
+      this.selectedTeam = { ...team }
       this.showChangeStatusModalVisible = true
     },
     async changeTeamStatus() {
@@ -909,6 +967,13 @@ export default {
         this.currentEvent = event
         this.showEventReportModalVisible = true
       }
+    },
+    getTeamNameById(teamId) {
+      const team = this.teams.find((t) => t._id === teamId)
+      return team ? team.teamname : 'Неизвестная команда'
+    },
+    goToTeamDetails(teamId) {
+      this.$router.push({ path: `/team/${teamId}` })
     }
   }
 }
